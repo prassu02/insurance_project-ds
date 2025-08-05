@@ -9,7 +9,7 @@ st.title("⚖️ Attorney Prediction for Insurance Claims")
 # Load model
 @st.cache_resource
 def load_model():
-    return joblib.load("model_attorney.pkl")
+    return joblib.load("claimants.csv")
 
 model = load_model()
 
@@ -63,4 +63,5 @@ if submitted:
     result = "✅ Attorney Involved" if prediction == 1 else "❌ No Attorney"
 
     st.success(f"### Prediction: {result}")
+
 
