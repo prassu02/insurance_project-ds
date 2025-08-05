@@ -4,11 +4,9 @@ import numpy as np
 import joblib
 import os
 
-# App layout settings
 st.set_page_config(page_title="Claims Attorney Predictor", layout="centered")
 st.title("⚖️ Claims Data Analysis & Attorney Prediction")
 
-# Load model
 @st.cache_resource
 def load_model():
     if os.path.exists("model.pkl"):
@@ -20,7 +18,6 @@ def load_model():
 model = load_model()
 
 if model:
-    # Input form
     with st.form("input_form"):
         st.write("### 📝 Enter Claim Details")
 
@@ -58,3 +55,4 @@ if model:
             st.success("✅ Prediction: Attorney Present")
         else:
             st.info("❌ Prediction: No Attorney")
+
