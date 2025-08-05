@@ -3,38 +3,41 @@ import pandas as pd
 import numpy as np
 import joblib
 
-# Page config
-st.set_page_config(page_title="Attorney Prediction", layout="centered")
-st.title("⚖️ Attorney Prediction for Insurance Claims")
+# Page settings
+st.set_page_config(page_title="Attorney Involvement Predictor", layout="centered")
+st.title("⚖️ Insurance Claim: Attorney Involvement Predictor")
 
-# Load trained model
+# Load the model
 @st.cache_resource
 def load_model():
     return joblib.load("model_attorney.pkl")
 
 model = load_model()
 
-# Input Form
-with st.form("input_form"):
-    st.subheader("📝 Enter Claim Details")
+# User input form
+with st.form("claim_form"):
+    st.subheader("📋 Enter Claim Details")
 
     CLMSEX = st.selectbox("Claimant Gender", [0, 1], format_func=lambda x: "Female" if x == 0 else "Male")
-    CLMINSUR = st.selectbox("Has Insurance?", [0, 1], format_func=lambda x: "No" if x == 0 else "Yes")
-    SEATBELT = st.selectbox("Wearing Seatbelt?", [0, 1])
-    CLMAGE = st.slider("Claimant Age", 18, 100, 30)
-    LOSS = st.number_input("Loss Amount", min_value=0.0, step=100.0)
-    Accident_Severity = st.selectbox("Accident Severity", ['Minor', 'Moderate', 'Severe'])
-    Claim_Amount_Requested = st.number_input("Claim Amount Requested", min_value=0.0, step=100.0)
-    Claim_Approval_Status = st.selectbox("Claim Approved?", [0, 1])
-    Settlement_Amount = st.number_input("Settlement Amount", min_value=0.0, step=100.0)
-    Policy_Type = st.selectbox("Policy Type", ['Comprehensive', 'Third-Party'])
-    Driving_Record = st.selectbox("Driving Record", ['Clean', 'Minor Offenses', 'Major Offenses'])
+    CLMINSUR = st.selectbox("Is the Claimant Insured?", [0, 1], format_func=lambda x: "No" if x == 0 else "Yes")
+    SEATBELT = st.selectbox("Was Seatbelt Worn?", [0, 1], format_func=lambda x: "No" if x == 0 else "Yes")
+    CLMAGE = st.slider("Claimant Age", min_value=18, max_value=100, value=30)
+    LOSS = st.number_input("Loss Amount ($)", min_value=0.0, step=100.0)
 
-    submitted = st.form_submit_button("🚀 Predict Attorney")
+    Accident_Severity = st.selectbox("Accident Severity", ["Minor", "Moderate", "Severe"])
+    Claim_Amount_Requested = st.number_input("Claim Amount Requested ($)", min_value=0.0, step=100.0)
+    Claim_Approval_Status = st.selectbox("Was Claim Approved?", [0, 1], format_func=lambda x: "No" if x == 0 else "Yes")
+    Settlement_Amount = st.number_input("Settlement Amount ($)", min_value=0.0, step=100.0)
 
-# Run prediction
+    Policy_Type = st.selectbox("Policy Type", ["Comprehensive", "Third-Party"])
+    Driving_Record = st.selectbox("Driving Record", ["Clean", "Minor Offenses", "Major Offenses"])
+
+    submitted = st.form_submit_button("🔍 Predict Attorney Involvement")
+
+# Prediction logic
 if submitted:
-    input_df = pd.DataFrame([{
+    # Prepare input as DataFrame
+    input_data = pd.DataFrame([{
         "CLMSEX": CLMSEX,
         "CLMINSUR": CLMINSUR,
         "SEATBELT": SEATBELT,
@@ -48,20 +51,21 @@ if submitted:
         "Driving_Record": Driving_Record
     }])
 
-    # Encoding
+    # Map categorical to numeric
     encode_map = {
         'Accident_Severity': {'Minor': 0, 'Moderate': 1, 'Severe': 2},
         'Policy_Type': {'Comprehensive': 0, 'Third-Party': 1},
         'Driving_Record': {'Clean': 0, 'Minor Offenses': 1, 'Major Offenses': 2}
     }
+
     for col, mapping in encode_map.items():
-        input_df[col] = input_df[col].map(mapping)
+        input_data[col] = input_data[col].map(mapping)
 
     # Predict
-    prediction = model.predict(input_df)[0]
-    result = "✅ Attorney Involved" if prediction == 1 else "❌ No Attorney"
+    prediction = model.predict(input_data)[0]
+    result = "✅ Attorney Involved" if prediction == 1 else "❌ No Attorney Involved"
 
-    st.success(f"### Prediction: {result}")
+    st.success(f"### Prediction Result: {result}")
 
 
 
